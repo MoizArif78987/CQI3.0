@@ -26,12 +26,13 @@ router.post('/', async (req, res) => {
 
       for (const question of questions) {
         const questionText = question.text;
-        const responseType = question.ResponseType;
-
-        // Insert the question for the respective titleId
-        const insertQuestionQuery = 'INSERT INTO questions (question, title_id, responseType, form_id) VALUES (?, ?, ?, ?)';
-        await db.query(insertQuestionQuery, [questionText, titleId, responseType, formId]);
+        const responseType = question.responseType;
+        const responseTable = responseType === 'text' ? 'TextResponses' : 'RatingResponses';
+      
+        const insertQuestionQuery = 'INSERT INTO questions (question, title_id, responseType, form_id, response_table) VALUES (?, ?, ?, ?, ?)';
+        await db.query(insertQuestionQuery, [questionText, titleId, responseType, formId, responseTable]);
       }
+      
     }
 
     res.status(200).send({ message: 'Data inserted successfully' });

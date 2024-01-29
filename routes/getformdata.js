@@ -4,20 +4,21 @@ const db = require('../database/database');
 
 router.get('/:id', async (req, res) => {
     const formId = req.params.id;
+    console.log(formId);
 
     try {
-        const formQuery = `SELECT * FROM forms WHERE form_id = ${formId}`;
+        const formQuery = `SELECT * FROM forms WHERE id = ${formId}`;
         const formResult = await db.query(formQuery);
         const formDetails = formResult[0][0];
         const titlesQuery = `
-            SELECT titles.title, questions.text, questions.ResponseType
+            SELECT titles.title as title, questions.id as questionid , questions.question as question, questions.ResponseType as ResponseType
             FROM titles
-            INNER JOIN questions ON titles.title_id = questions.title_id
+            INNER JOIN questions ON titles.id = questions.title_id
             WHERE titles.form_id = ${formId}
         `;
         const titlesResult = await db.query(titlesQuery);
         const formattedData = {
-            form_id: formDetails.form_id,
+            form_id: formDetails.id, 
             formTitle: formDetails.formTitle,
             category: formDetails.category,
             titles: []
@@ -29,7 +30,8 @@ router.get('/:id', async (req, res) => {
                 titlesMap.set(title, []);
             }
             titlesMap.get(title).push({
-                text: row.text,
+                questions_id: row.questionid,
+                question: row.question,
                 ResponseType: row.ResponseType
             });
         });
@@ -39,7 +41,6 @@ router.get('/:id', async (req, res) => {
                 questions: questions
             });
         });
-
         res.status(200).send(formattedData);
     } catch (error) {
         console.error('Error:', error);
